@@ -396,6 +396,52 @@
 
   .copy-feedback.show { opacity: 1; }
 
+  /* Open-with AI buttons */
+  .open-with-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .btn-ai {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(201,168,76,0.22);
+    background: rgba(255,255,255,0.03);
+    color: #9b8f7a;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ai:hover {
+    border-color: rgba(201,168,76,0.55);
+    color: var(--gold);
+    background: rgba(201,168,76,0.07);
+  }
+
+  .btn-ai svg { flex-shrink: 0; }
+
+  .ai-toast {
+    display: block;
+    margin-top: 12px;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: #6a9a6a;
+    opacity: 0;
+    transition: opacity 0.35s;
+    min-height: 1.2em;
+  }
+
+  .ai-toast.show { opacity: 1; }
+
   /* divider */
   .divider {
     border: none;
@@ -458,6 +504,25 @@
     <div class="prompt-box" id="promptBox"></div>
     <button class="btn btn-primary" onclick="copyPrompt()" data-en="Copy Prompt" data-th="คัดลอกพรอมต์">Copy Prompt</button>
     <span class="copy-feedback" id="copyFeedback" data-en="Copied!" data-th="คัดลอกแล้ว!">Copied!</span>
+
+    <div class="open-with-row">
+      <button class="btn-ai" onclick="openWith('claude')">
+        <!-- Claude logo mark -->
+        <svg width="16" height="16" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.678 7.142c-1.082 0-2.085.47-2.74 1.276L6.664 25.03a3.614 3.614 0 0 0-.27 3.9l6.31 11.434a3.614 3.614 0 0 0 3.167 1.852h14.34a3.614 3.614 0 0 0 3.167-1.852l6.31-11.434a3.614 3.614 0 0 0-.27-3.9L26.144 8.418a3.614 3.614 0 0 0-2.74-1.276h-.726Z" fill="currentColor" opacity=".85"/></svg>
+        <span data-en="Open with Claude" data-th="เปิดด้วย Claude">Open with Claude</span>
+      </button>
+      <button class="btn-ai" onclick="openWith('chatgpt')">
+        <!-- ChatGPT logo mark -->
+        <svg width="16" height="16" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M37.532 16.87a9.963 9.963 0 0 0-.856-8.184 10.078 10.078 0 0 0-10.855-4.835 9.964 9.964 0 0 0-6.131-3.386 10.079 10.079 0 0 0-10.855 4.835 9.965 9.965 0 0 0-6.508 4.322 10.079 10.079 0 0 0 1.24 11.817 9.965 9.965 0 0 0 .856 8.185 10.079 10.079 0 0 0 10.855 4.835 9.965 9.965 0 0 0 6.131 3.386 10.079 10.079 0 0 0 10.855-4.835 9.965 9.965 0 0 0 6.507-4.322 10.079 10.079 0 0 0-1.239-11.818Zm-15.436 21.046a7.474 7.474 0 0 1-4.801-1.73l.239-.136 7.964-4.6a1.328 1.328 0 0 0 .668-1.15v-11.24l3.365 1.944a.122.122 0 0 1 .066.092v9.299c-.003 4.143-3.36 7.504-7.501 7.521Zm-16.123-6.908a7.474 7.474 0 0 1-.894-5.03l.239.144 7.964 4.6a1.326 1.326 0 0 0 1.336 0l9.724-5.614v3.888a.12.12 0 0 1-.048.103l-8.051 4.649c-3.59 2.07-8.18.846-10.27-2.74Zm-2.096-17.439a7.474 7.474 0 0 1 3.906-3.288l-.002.276v9.198a1.327 1.327 0 0 0 .667 1.15l9.724 5.614-3.365 1.944a.12.12 0 0 1-.116.013L6.623 23.78c-3.594-2.072-4.816-6.662-2.746-10.21Zm27.658 6.437-9.724-5.615 3.365-1.943a.121.121 0 0 1 .116-.013l8.048 4.648c3.592 2.073 4.814 6.663 2.743 10.21a7.474 7.474 0 0 1-3.903 3.288l.001-.275v-9.199a1.327 1.327 0 0 0-.646-1.101Zm3.35-5.043-.239-.145-7.964-4.6a1.327 1.327 0 0 0-1.336 0l-9.724 5.614v-3.888a.12.12 0 0 1 .048-.103l8.051-4.648c3.592-2.071 8.182-.847 10.27 2.742a7.474 7.474 0 0 1 .894 5.028ZM14.89 22.699l-3.365-1.943a.121.121 0 0 1-.066-.093v-9.299c.002-4.144 3.361-7.505 7.504-7.52a7.474 7.474 0 0 1 4.8 1.729l-.239.136-7.964 4.6a1.327 1.327 0 0 0-.668 1.15l-.002 11.24Zm1.829-3.943 4.33-2.501 4.332 2.5v4.999l-4.331 2.5-4.331-2.5v-4.998Z" fill="currentColor"/></svg>
+        <span data-en="Open with ChatGPT" data-th="เปิดด้วย ChatGPT">Open with ChatGPT</span>
+      </button>
+      <button class="btn-ai" onclick="openWith('gemini')">
+        <!-- Gemini star mark -->
+        <svg width="16" height="16" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 28C14 26.0633 13.6267 24.2433 12.88 22.54C12.1567 20.8367 11.165 19.355 9.905 18.095C8.645 16.835 7.16333 15.8433 5.46 15.12C3.75667 14.3733 1.93667 14 0 14C1.93667 14 3.75667 13.6383 5.46 12.915C7.16333 12.1683 8.645 11.165 9.905 9.905C11.165 8.645 12.1567 7.16333 12.88 5.46C13.6267 3.75667 14 1.93667 14 0C14 1.93667 14.3617 3.75667 15.085 5.46C15.8317 7.16333 16.835 8.645 18.095 9.905C19.355 11.165 20.8367 12.1683 22.54 12.915C24.2433 13.6383 26.0633 14 28 14C26.0633 14 24.2433 14.3733 22.54 15.12C20.8367 15.8433 19.355 16.835 18.095 18.095C16.835 19.355 15.8317 20.8367 15.085 22.54C14.3617 24.2433 14 26.0633 14 28Z" fill="currentColor"/></svg>
+        <span data-en="Open with Gemini" data-th="เปิดด้วย Gemini">Open with Gemini</span>
+      </button>
+    </div>
+    <span class="ai-toast" id="aiToast"></span>
   </div>
 
 </div>
@@ -788,6 +853,33 @@ function renderPlaceholders() {
 
 // init
 renderPlaceholders();
+
+function showAiToast(msg) {
+  const t = document.getElementById('aiToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function openWith(service) {
+  const prompt = document.getElementById('promptBox').textContent;
+  navigator.clipboard.writeText(prompt).catch(() => {});
+
+  const enc = encodeURIComponent(prompt);
+  const urls = {
+    claude:  `https://claude.ai/new?q=${enc}`,
+    chatgpt: `https://chatgpt.com/?q=${enc}`,
+    gemini:  `https://gemini.google.com/app`,
+  };
+  const msgs = {
+    claude:  lang === 'th' ? 'กรอกพรอมต์แล้ว — กด Enter เพื่อส่ง' : 'Prompt pre-filled — press Enter to send',
+    chatgpt: lang === 'th' ? 'กรอกพรอมต์แล้ว — กด Enter เพื่อส่ง' : 'Prompt pre-filled — press Enter to send',
+    gemini:  lang === 'th' ? 'คัดลอกพรอมต์แล้ว — วางในแชท' : 'Prompt copied — paste it into the chat',
+  };
+  window.open(urls[service], '_blank');
+  showAiToast(msgs[service]);
+}
 
 async function copyPrompt() {
   const text = document.getElementById('promptBox').textContent;
