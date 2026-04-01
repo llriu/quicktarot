@@ -375,10 +375,10 @@
     border-radius: 6px;
     padding: 16px;
     font-family: 'Crimson Text', Georgia, serif;
-    font-size: 1rem;
-    color: #9b8f7a;
+    font-size: 1.05rem;
+    color: #c0b898;
     white-space: pre-wrap;
-    line-height: 1.6;
+    line-height: 1.75;
     max-height: 320px;
     overflow-y: auto;
     margin-bottom: 14px;
@@ -519,9 +519,115 @@
   }
 
   @media (max-width: 560px) {
-    :root { --card-w: 120px; --card-h: 210px; }
-    .spread { gap: 16px; }
+    :root { --card-w: 130px; --card-h: 228px; }
+    .wrap { padding: 18px 14px 40px; }
+    header { margin-bottom: 22px; }
+    header h1 { font-size: clamp(1.6rem, 7vw, 2.4rem); }
+    header p { font-size: 0.95rem; margin-top: 5px; }
+    .question-block { margin-bottom: 18px; }
+    textarea { min-height: 58px; font-size: 1rem; padding: 10px 12px; }
+    .count-pick { margin-bottom: 10px; gap: 8px; }
+    .controls { margin-bottom: 28px; gap: 8px; }
+    .btn { padding: 10px 18px; font-size: 0.73rem; }
+    .spread { display: grid; grid-template-columns: repeat(2, var(--card-w)); gap: 18px; margin-bottom: 28px; }
+    .divider { margin: 22px 0; }
+    .open-with-row { gap: 8px; }
+    .btn-ai { padding: 8px 14px; font-size: 0.68rem; }
+    .export-block h2 { margin-bottom: 10px; }
   }
+
+  /* Prompt tabs */
+  .prompt-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .prompt-tab {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 7px 15px;
+    border: 1px solid rgba(201,168,76,0.22);
+    background: transparent;
+    color: #5a5040;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.18s;
+  }
+
+  .prompt-tab.active {
+    color: var(--gold);
+    border-color: rgba(201,168,76,0.55);
+    background: rgba(201,168,76,0.1);
+  }
+
+  .prompt-tab:hover:not(.active) { color: #9b8f7a; border-color: rgba(201,168,76,0.35); }
+
+  /* Prompt customise */
+  .customize-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: #4a4030;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+  }
+
+  .customize-toggle:hover { color: #9b8f7a; }
+
+  .toggle-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+    font-size: 0.55rem;
+    line-height: 1;
+  }
+
+  .customize-toggle.open .toggle-arrow { transform: rotate(90deg); }
+
+  .customize-area {
+    display: none;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 6px;
+  }
+
+  .customize-area.open { display: block; }
+
+  .customize-area textarea {
+    min-height: 200px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #c0b898;
+    margin-bottom: 10px;
+    resize: vertical;
+  }
+
+  .customize-reset {
+    background: none;
+    border: none;
+    color: #4a4030;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+  }
+
+  .customize-reset:hover { color: #9b8f7a; }
 </style>
 </head>
 <body>
@@ -570,6 +676,27 @@
 
   <div class="export-block" id="exportBlock" style="display:none">
     <h2 data-en="LLM Prompt" data-th="พรอมต์สำหรับ AI">LLM Prompt</h2>
+
+    <div class="prompt-tabs">
+      <button class="prompt-tab active" id="tabFull" onclick="switchTab('full')">
+        <span data-en="Full Reading" data-th="อ่านเต็ม">Full Reading</span>
+      </button>
+      <button class="prompt-tab" id="tabContinue" onclick="switchTab('continue')">
+        <span data-en="Follow-up" data-th="ต่อบทสนทนา">Follow-up</span>
+      </button>
+    </div>
+
+    <div id="customizeSection">
+      <button class="customize-toggle" id="customizeToggle" onclick="toggleCustomize()">
+        <span class="toggle-arrow">▶</span>
+        <span data-en="Edit system prompt" data-th="แก้ไขคำสั่งระบบ">Edit system prompt</span>
+      </button>
+      <div class="customize-area" id="customizeArea">
+        <textarea id="customSystemInput" oninput="onCustomSystemInput()"></textarea>
+        <button class="customize-reset" onclick="resetCustomSystem()" data-en="↺ Reset to default" data-th="↺ คืนค่าเริ่มต้น">↺ Reset to default</button>
+      </div>
+    </div>
+
     <div class="prompt-box" id="promptBox"></div>
     <button class="btn btn-primary" onclick="copyPrompt()" data-en="Copy Prompt" data-th="คัดลอกพรอมต์">Copy Prompt</button>
     <span class="copy-feedback" id="copyFeedback" data-en="Copied!" data-th="คัดลอกแล้ว!">Copied!</span>
@@ -632,8 +759,12 @@ function setLang(l) {
   // Re-render spread or placeholders
   if (drawnCards.length) {
     renderSpread();
-    if (document.getElementById('exportBlock').style.display !== 'none') {
-      document.getElementById('promptBox').textContent = buildPrompt();
+    refreshPromptBox();
+    // Update customize textarea if open
+    const area = document.getElementById('customizeArea');
+    if (area && area.classList.contains('open')) {
+      document.getElementById('customSystemInput').value =
+        l === 'th' ? (customSystemTH || DEFAULT_SYSTEM_TH) : (customSystemEN || DEFAULT_SYSTEM_EN);
     }
   } else {
     renderPlaceholders();
@@ -692,6 +823,9 @@ function positionLabel(i) {
 
 let drawnCards = []; // [{card, reversed, revealed}]
 let cardCount = 3;
+let activeTab = 'full';
+let customSystemEN = null; // null = use default
+let customSystemTH = null;
 
 // card dimensions by count
 const CARD_SIZES = {
@@ -844,46 +978,9 @@ function resetDeck() {
   renderPlaceholders();
 }
 
-// ── Prompt builder ───────────────────────────────────────────────────────────
+// ── Default system prompts ────────────────────────────────────────────────────
 
-function buildPrompt() {
-  const question = document.getElementById('question').value.trim();
-  const isTH = lang === 'th';
-  const n = drawnCards.length;
-
-  const cardLines = drawnCards.map((entry, i) => {
-    const cardName = isTH ? (entry.card.nameTH || entry.card.name) : entry.card.name;
-    const rev = entry.reversed ? (isTH ? ' (กลับหัว)' : ' (Reversed)') : '';
-    return `  ${isTH ? 'ไพ่' : 'Card'} ${i + 1}: ${cardName}${rev}`;
-  }).join('\n');
-
-  let systemBlock, prompt;
-
-  if (isTH) {
-    systemBlock = `คุณคือหมอดูไพ่ทาโรต์ผู้เชี่ยวชาญอย่างลึกซึ้ง — ได้รับการศึกษาในประเพณี Rider-Waite คุ้นเคยกับการทำงานเงาแบบยุง สัญลักษณ์เฮอร์เมติก และน้ำหนักที่แท้จริงของประสบการณ์มนุษย์ คุณไม่ให้คำพูดที่คลุมเครือหรือไม่มีความหมาย คุณอ่านสิ่งที่อยู่ตรงหน้าคุณจริงๆ: ไพ่เฉพาะ ตำแหน่ง การกลับหัว และคำถามที่ถาม การอ่านของคุณ:
-
-• แม่นยำ — อิงจากความหมายไพ่คลาสสิกและการปฏิสัมพันธ์ระหว่างกัน
-• ลึกซึ้ง — คุณติดตามด้ายสัญลักษณ์ตลอดทุกใบในฐานะเรื่องราวที่เชื่อมโยงกัน
-• ลึกลับ — คุณตั้งชื่อสิ่งที่ผู้ถามอาจไม่ได้พูดออกมาแต่จะรับรู้ว่าเป็นความจริง; คุณค้นหาการสั่นสะเทือนที่น่าหวาดเสียวระหว่างภาพและสถานการณ์
-• ซื่อสัตย์ — คุณไม่ทำให้ไพ่ที่ยากลำบากดูอ่อนลง; ความตาย หอคอย หรือไพ่กลับหัวถูกอ่านด้วยสายตาที่ชัดเจน
-
-โครงสร้างการอ่านของคุณ:
-1. บทนำสั้นๆ ที่บรรยายบรรยากาศโดยรวมของการวางไพ่
-2. การอ่านอย่างละเอียดของแต่ละใบในตำแหน่งของมัน ตามลำดับ
-3. การสังเคราะห์: ไพ่ทั้งหมดรวมกันสร้างข้อความเดียวหรือความตึงเครียดอย่างไร
-4. การสังเกตปิด — ข้อมูลเชิงลึกที่แม่นยำและไม่คาดคิดหนึ่งข้อที่ตัดถึงใจของคำถาม
-
-อย่าออกจากตัวละคร อย่าเพิ่มข้อแม้เกี่ยวกับการที่ไพ่ทาโรต์เป็น "เพื่อความบันเทิง" พูดในฐานะคนที่นั่งอยู่ตรงข้ามกับผู้คนร้อยคนในช่วงเวลาเปลี่ยนผ่านของชีวิตพวกเขา ตอบเป็นภาษาไทย`;
-
-    prompt = `${systemBlock}\n\n`;
-    if (question) {
-      prompt += `ผู้ถามถามว่า: "${question}"\n\n`;
-    } else {
-      prompt += `ผู้ถามจั่วไพ่โดยไม่ได้ตั้งคำถาม — อ่านสิ่งที่ไพ่เปิดเผยด้วยตัวเอง\n\n`;
-    }
-    prompt += `การวางไพ่ ${n} ใบ:\n${cardLines}\n\nเริ่มการอ่าน`;
-  } else {
-    systemBlock = `You are a tarot reader of rare depth — learned in the Rider-Waite tradition, conversant with Jungian shadow work, Hermetic symbolism, and the lived weight of human experience. You do not give vague platitudes. You read what is actually in front of you: the specific cards, their positions, their reversals, and the question asked. Your readings are:
+const DEFAULT_SYSTEM_EN = `You are a tarot reader of rare depth — learned in the Rider-Waite tradition, conversant with Jungian shadow work, Hermetic symbolism, and the lived weight of human experience. You do not give vague platitudes. You read what is actually in front of you: the specific cards, their positions, their reversals, and the question asked. Your readings are:
 
 • Accurate — grounded in classical card meanings and their interaction with one another
 • In-depth — you trace the symbolic thread across all cards as a coherent narrative arc
@@ -898,21 +995,120 @@ Structure your reading as:
 
 Do not break character. Do not add caveats about tarot being "for entertainment." Speak as someone who has sat across from a hundred people at a turning point in their lives.`;
 
-    prompt = `${systemBlock}\n\n`;
-    if (question) {
-      prompt += `The querent asks: "${question}"\n\n`;
-    } else {
-      prompt += `The querent has drawn without voicing a question — read what the cards reveal on their own.\n\n`;
-    }
-    prompt += `The ${n}-card spread is:\n${cardLines}\n\nBegin the reading.`;
-  }
+const DEFAULT_SYSTEM_TH = `คุณคือหมอดูไพ่ทาโรต์ผู้เชี่ยวชาญอย่างลึกซึ้ง — ได้รับการศึกษาในประเพณี Rider-Waite คุ้นเคยกับการทำงานเงาแบบยุง สัญลักษณ์เฮอร์เมติก และน้ำหนักที่แท้จริงของประสบการณ์มนุษย์ คุณไม่ให้คำพูดที่คลุมเครือหรือไม่มีความหมาย คุณอ่านสิ่งที่อยู่ตรงหน้าคุณจริงๆ: ไพ่เฉพาะ ตำแหน่ง การกลับหัว และคำถามที่ถาม การอ่านของคุณ:
 
+• แม่นยำ — อิงจากความหมายไพ่คลาสสิกและการปฏิสัมพันธ์ระหว่างกัน
+• ลึกซึ้ง — คุณติดตามด้ายสัญลักษณ์ตลอดทุกใบในฐานะเรื่องราวที่เชื่อมโยงกัน
+• ลึกลับ — คุณตั้งชื่อสิ่งที่ผู้ถามอาจไม่ได้พูดออกมาแต่จะรับรู้ว่าเป็นความจริง; คุณค้นหาการสั่นสะเทือนที่น่าหวาดเสียวระหว่างภาพและสถานการณ์
+• ซื่อสัตย์ — คุณไม่ทำให้ไพ่ที่ยากลำบากดูอ่อนลง; ความตาย หอคอย หรือไพ่กลับหัวถูกอ่านด้วยสายตาที่ชัดเจน
+
+โครงสร้างการอ่านของคุณ:
+1. บทนำสั้นๆ ที่บรรยายบรรยากาศโดยรวมของการวางไพ่
+2. การอ่านอย่างละเอียดของแต่ละใบในตำแหน่งของมัน ตามลำดับ
+3. การสังเคราะห์: ไพ่ทั้งหมดรวมกันสร้างข้อความเดียวหรือความตึงเครียดอย่างไร
+4. การสังเกตปิด — ข้อมูลเชิงลึกที่แม่นยำและไม่คาดคิดหนึ่งข้อที่ตัดถึงใจของคำถาม
+
+อย่าออกจากตัวละคร อย่าเพิ่มข้อแม้เกี่ยวกับการที่ไพ่ทาโรต์เป็น "เพื่อความบันเทิง" พูดในฐานะคนที่นั่งอยู่ตรงข้ามกับผู้คนร้อยคนในช่วงเวลาเปลี่ยนผ่านของชีวิตพวกเขา ตอบเป็นภาษาไทย`;
+
+// ── Prompt builder ───────────────────────────────────────────────────────────
+
+function cardLines() {
+  const isTH = lang === 'th';
+  return drawnCards.map((entry, i) => {
+    const cardName = isTH ? (entry.card.nameTH || entry.card.name) : entry.card.name;
+    const rev = entry.reversed ? (isTH ? ' (กลับหัว)' : ' (Reversed)') : '';
+    return `  ${isTH ? 'ไพ่' : 'Card'} ${i + 1}: ${cardName}${rev}`;
+  }).join('\n');
+}
+
+function buildPrompt() {
+  const question = document.getElementById('question').value.trim();
+  const isTH = lang === 'th';
+  const n = drawnCards.length;
+  const lines = cardLines();
+  const systemBlock = isTH
+    ? (customSystemTH || DEFAULT_SYSTEM_TH)
+    : (customSystemEN || DEFAULT_SYSTEM_EN);
+
+  let prompt = `${systemBlock}\n\n`;
+  if (isTH) {
+    prompt += question
+      ? `ผู้ถามถามว่า: "${question}"\n\n`
+      : `ผู้ถามจั่วไพ่โดยไม่ได้ตั้งคำถาม — อ่านสิ่งที่ไพ่เปิดเผยด้วยตัวเอง\n\n`;
+    prompt += `การวางไพ่ ${n} ใบ:\n${lines}\n\nเริ่มการอ่าน`;
+  } else {
+    prompt += question
+      ? `The querent asks: "${question}"\n\n`
+      : `The querent has drawn without voicing a question — read what the cards reveal on their own.\n\n`;
+    prompt += `The ${n}-card spread is:\n${lines}\n\nBegin the reading.`;
+  }
   return prompt;
 }
 
+function buildContinuePrompt() {
+  const question = document.getElementById('question').value.trim();
+  const isTH = lang === 'th';
+  const n = drawnCards.length;
+  const lines = cardLines();
+
+  let prompt = '';
+  if (isTH) {
+    if (question) prompt += `ผู้ถามถามว่า: "${question}"\n\n`;
+    prompt += `การวางไพ่ ${n} ใบ:\n${lines}`;
+  } else {
+    if (question) prompt += `The querent asks: "${question}"\n\n`;
+    prompt += `The ${n}-card spread is:\n${lines}`;
+  }
+  return prompt;
+}
+
+// ── Tab & customise ──────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabFull').classList.toggle('active', tab === 'full');
+  document.getElementById('tabContinue').classList.toggle('active', tab === 'continue');
+  document.getElementById('customizeSection').style.display = tab === 'full' ? '' : 'none';
+  refreshPromptBox();
+}
+
+function refreshPromptBox() {
+  if (!drawnCards.length || !drawnCards.every(e => e.revealed)) return;
+  document.getElementById('promptBox').textContent =
+    activeTab === 'full' ? buildPrompt() : buildContinuePrompt();
+}
+
+function toggleCustomize() {
+  const btn = document.getElementById('customizeToggle');
+  const area = document.getElementById('customizeArea');
+  const isOpen = area.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  if (isOpen) {
+    document.getElementById('customSystemInput').value =
+      lang === 'th' ? (customSystemTH || DEFAULT_SYSTEM_TH) : (customSystemEN || DEFAULT_SYSTEM_EN);
+  }
+}
+
+function onCustomSystemInput() {
+  const val = document.getElementById('customSystemInput').value;
+  if (lang === 'th') { customSystemTH = val; } else { customSystemEN = val; }
+  refreshPromptBox();
+}
+
+function resetCustomSystem() {
+  if (lang === 'th') {
+    customSystemTH = null;
+    document.getElementById('customSystemInput').value = DEFAULT_SYSTEM_TH;
+  } else {
+    customSystemEN = null;
+    document.getElementById('customSystemInput').value = DEFAULT_SYSTEM_EN;
+  }
+  refreshPromptBox();
+}
+
 function buildAndShowPrompt() {
-  const prompt = buildPrompt();
-  document.getElementById('promptBox').textContent = prompt;
+  switchTab('full');
+  refreshPromptBox();
   document.getElementById('exportBlock').style.display = 'block';
   document.getElementById('exportBlock').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
