@@ -116,7 +116,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
   }
 
@@ -458,19 +458,6 @@
 <body>
 <div class="wrap">
 
-  <div class="count-pick">
-    <span class="count-pick-label" data-en="Cards" data-th="ไพ่">Cards</span>
-    <div class="count-btns" id="countBtns">
-      <button class="count-btn" onclick="setCount(1)">1</button>
-      <button class="count-btn" onclick="setCount(2)">2</button>
-      <button class="count-btn active" onclick="setCount(3)">3</button>
-      <button class="count-btn" onclick="setCount(4)">4</button>
-      <button class="count-btn" onclick="setCount(5)">5</button>
-      <button class="count-btn" onclick="setCount(6)">6</button>
-      <button class="count-btn" onclick="setCount(7)">7</button>
-    </div>
-  </div>
-
   <div class="lang-toggle">
     <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
     <button class="lang-btn" id="btn-th" onclick="setLang('th')">ไทย</button>
@@ -484,6 +471,19 @@
   <div class="question-block">
     <label for="question" data-en="Your question" data-th="คำถามของคุณ">Your question</label>
     <textarea id="question" data-placeholder-en="What would you ask of the cards?" data-placeholder-th="คุณต้องการถามไพ่ว่าอะไร?" placeholder="What would you ask of the cards?" rows="3"></textarea>
+  </div>
+
+  <div class="count-pick">
+    <span class="count-pick-label" data-en="Cards" data-th="ไพ่">Cards</span>
+    <div class="count-btns" id="countBtns">
+      <button class="count-btn" onclick="setCount(1)">1</button>
+      <button class="count-btn" onclick="setCount(2)">2</button>
+      <button class="count-btn active" onclick="setCount(3)">3</button>
+      <button class="count-btn" onclick="setCount(4)">4</button>
+      <button class="count-btn" onclick="setCount(5)">5</button>
+      <button class="count-btn" onclick="setCount(6)">6</button>
+      <button class="count-btn" onclick="setCount(7)">7</button>
+    </div>
   </div>
 
   <div class="controls">
