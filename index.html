@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Tarot</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Sarabun:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-dim: #7a6229;
+    --deep: #0a0812;
+    --card-w: 160px;
+    --card-h: 280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--deep);
+    color: #e8dfc8;
+    font-family: 'Crimson Text', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* starfield */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 8%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 15% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 78% 88%, rgba(255,255,255,0.5) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-shadow: 0 0 40px rgba(201,168,76,0.4);
+  }
+
+  header p {
+    margin-top: 8px;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #9b8f7a;
+  }
+
+  /* Question */
+  .question-block {
+    margin-bottom: 32px;
+  }
+
+  .question-block label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 6px;
+    color: #e8dfc8;
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1.15rem;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus {
+    border-color: rgba(201,168,76,0.6);
+  }
+
+  textarea::placeholder { color: #5a5040; }
+
+  /* Controls */
+  /* Card count picker */
+  .count-pick {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .count-pick-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    white-space: nowrap;
+  }
+
+  .count-btns {
+    display: flex;
+    gap: 0;
+  }
+
+  .count-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    width: 34px;
+    height: 30px;
+    border: 1px solid rgba(201,168,76,0.22);
+    border-right: none;
+    background: transparent;
+    color: #5a5040;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .count-btn:last-child { border-right: 1px solid rgba(201,168,76,0.22); border-radius: 0 4px 4px 0; }
+  .count-btn:first-child { border-radius: 4px 0 0 4px; }
+
+  .count-btn.active {
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    border-color: rgba(201,168,76,0.5);
+  }
+
+  .count-btn:hover:not(.active) { color: #9b8f7a; }
+
+  /* Language toggle */
+  .lang-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    gap: 0;
+  }
+
+  .lang-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    border: 1px solid rgba(201,168,76,0.25);
+    background: transparent;
+    color: #5a5040;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .lang-btn:first-child { border-radius: 4px 0 0 4px; }
+  .lang-btn:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
+
+  .lang-btn.active {
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    border-color: rgba(201,168,76,0.5);
+  }
+
+  body.lang-th { font-family: 'Sarabun', sans-serif; }
+  body.lang-th textarea { font-family: 'Sarabun', sans-serif; }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 11px 26px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b6914, #c9a84c, #8b6914);
+    color: #0a0812;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 20px rgba(201,168,76,0.3);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--gold-dim);
+    border: 1px solid var(--gold-dim);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: none;
+    box-shadow: none;
+  }
+
+  /* Spread */
+  .spread {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .card-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .position-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+
+  /* 3D card flip */
+  .card-scene {
+    width: var(--card-w);
+    height: var(--card-h);
+    perspective: 900px;
+    cursor: pointer;
+  }
+
+  .card-scene.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-scene.reversed .card-inner {
+    transform: rotateY(180deg) rotate(180deg);
+  }
+
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .card-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .card-back-face {
+    /* default: shows back */
+  }
+
+  .card-front-face {
+    transform: rotateY(180deg);
+  }
+
+  /* empty slot before shuffle */
+  .card-placeholder {
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: 10px;
+    border: 1px dashed rgba(201,168,76,0.2);
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-placeholder span {
+    font-size: 2.5rem;
+    opacity: 0.15;
+  }
+
+  .card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    color: #9b8f7a;
+    min-height: 1.4em;
+    max-width: var(--card-w);
+  }
+
+  .card-name .reversed-tag {
+    display: block;
+    font-size: 0.6rem;
+    color: #7a5a5a;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* Reveal hint */
+  .reveal-hint {
+    text-align: center;
+    font-style: italic;
+    color: #5a5040;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+
+  /* Export area */
+  .export-block {
+    margin-top: 8px;
+  }
+
+  .export-block h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .prompt-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1rem;
+    color: #9b8f7a;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    max-height: 320px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+    word-break: break-word;
+  }
+
+  .copy-feedback {
+    display: inline-block;
+    margin-left: 12px;
+    font-size: 0.85rem;
+    color: #6a9a6a;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .copy-feedback.show { opacity: 1; }
+
+  /* divider */
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(201,168,76,0.1);
+    margin: 36px 0;
+  }
+
+  @media (max-width: 560px) {
+    :root { --card-w: 120px; --card-h: 210px; }
+    .spread { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="count-pick">
+    <span class="count-pick-label" data-en="Cards" data-th="ไพ่">Cards</span>
+    <div class="count-btns" id="countBtns">
+      <button class="count-btn" onclick="setCount(1)">1</button>
+      <button class="count-btn" onclick="setCount(2)">2</button>
+      <button class="count-btn active" onclick="setCount(3)">3</button>
+      <button class="count-btn" onclick="setCount(4)">4</button>
+      <button class="count-btn" onclick="setCount(5)">5</button>
+      <button class="count-btn" onclick="setCount(6)">6</button>
+      <button class="count-btn" onclick="setCount(7)">7</button>
+    </div>
+  </div>
+
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="btn-th" onclick="setLang('th')">ไทย</button>
+  </div>
+
+  <header>
+    <h1>&#9890; <span data-en="Quick Tarot" data-th="ไพ่ทาโรต์">Quick Tarot</span></h1>
+    <p data-en="Shuffle the deck &mdash; let the cards speak" data-th="สับไพ่ &mdash; ปล่อยให้ไพ่พูด">Shuffle the deck &mdash; let the cards speak</p>
+  </header>
+
+  <div class="question-block">
+    <label for="question" data-en="Your question" data-th="คำถามของคุณ">Your question</label>
+    <textarea id="question" data-placeholder-en="What would you ask of the cards?" data-placeholder-th="คุณต้องการถามไพ่ว่าอะไร?" placeholder="What would you ask of the cards?" rows="3"></textarea>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="shuffleBtn" onclick="shuffleDeal()" data-en="Shuffle &amp; Draw" data-th="สับและจั่วไพ่">Shuffle &amp; Draw</button>
+    <button class="btn btn-secondary" id="revealBtn" onclick="revealAll()" disabled data-en="Reveal All" data-th="เปิดทั้งหมด">Reveal All</button>
+    <button class="btn btn-secondary" id="resetBtn" onclick="resetDeck()" data-en="Reset" data-th="เริ่มใหม่">Reset</button>
+  </div>
+
+  <div class="spread" id="spread">
+  </div>
+
+  <p class="reveal-hint" id="revealHint" style="display:none" data-en="Click a card to flip it" data-th="คลิกที่ไพ่เพื่อเปิด">Click a card to flip it</p>
+
+  <hr class="divider">
+
+  <div class="export-block" id="exportBlock" style="display:none">
+    <h2 data-en="LLM Prompt" data-th="พรอมต์สำหรับ AI">LLM Prompt</h2>
+    <div class="prompt-box" id="promptBox"></div>
+    <button class="btn btn-primary" onclick="copyPrompt()" data-en="Copy Prompt" data-th="คัดลอกพรอมต์">Copy Prompt</button>
+    <span class="copy-feedback" id="copyFeedback" data-en="Copied!" data-th="คัดลอกแล้ว!">Copied!</span>
+  </div>
+
+</div>
+
+<script>
+// ── Language ─────────────────────────────────────────────────────────────────
+
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  document.body.classList.toggle('lang-th', l === 'th');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-th').classList.toggle('active', l === 'th');
+
+  // Update all data-en / data-th elements
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.innerHTML = el.getAttribute(`data-${l}`) || el.getAttribute('data-en');
+  });
+
+  // Textarea placeholder
+  const ta = document.getElementById('question');
+  ta.placeholder = ta.getAttribute(`data-placeholder-${l}`) || ta.getAttribute('data-placeholder-en');
+
+  // Re-render spread or placeholders
+  if (drawnCards.length) {
+    renderSpread();
+    if (document.getElementById('exportBlock').style.display !== 'none') {
+      document.getElementById('promptBox').textContent = buildPrompt();
+    }
+  } else {
+    renderPlaceholders();
+  }
+}
+
+// ── Card data ────────────────────────────────────────────────────────────────
+
+const MAJOR = [
+  { file: '00-TheFool',         name: 'The Fool',           nameTH: 'คนโง่' },
+  { file: '01-TheMagician',     name: 'The Magician',       nameTH: 'นักมายากล' },
+  { file: '02-TheHighPriestess',name: 'The High Priestess', nameTH: 'นักบวชหญิงผู้ยิ่งใหญ่' },
+  { file: '03-TheEmpress',      name: 'The Empress',        nameTH: 'จักรพรรดินี' },
+  { file: '04-TheEmperor',      name: 'The Emperor',        nameTH: 'จักรพรรดิ' },
+  { file: '05-TheHierophant',   name: 'The Hierophant',     nameTH: 'นักบวชผู้ยิ่งใหญ่' },
+  { file: '06-TheLovers',       name: 'The Lovers',         nameTH: 'คู่รัก' },
+  { file: '07-TheChariot',      name: 'The Chariot',        nameTH: 'รถศึก' },
+  { file: '08-Strength',        name: 'Strength',           nameTH: 'ความแข็งแกร่ง' },
+  { file: '09-TheHermit',       name: 'The Hermit',         nameTH: 'ฤๅษี' },
+  { file: '10-WheelOfFortune',  name: 'Wheel of Fortune',   nameTH: 'วงล้อแห่งโชคชะตา' },
+  { file: '11-Justice',         name: 'Justice',            nameTH: 'ความยุติธรรม' },
+  { file: '12-TheHangedMan',    name: 'The Hanged Man',     nameTH: 'ชายถูกแขวน' },
+  { file: '13-Death',           name: 'Death',              nameTH: 'ความตาย' },
+  { file: '14-Temperance',      name: 'Temperance',         nameTH: 'ความพอดี' },
+  { file: '15-TheDevil',        name: 'The Devil',          nameTH: 'ปีศาจ' },
+  { file: '16-TheTower',        name: 'The Tower',          nameTH: 'หอคอย' },
+  { file: '17-TheStar',         name: 'The Star',           nameTH: 'ดาว' },
+  { file: '18-TheMoon',         name: 'The Moon',           nameTH: 'พระจันทร์' },
+  { file: '19-TheSun',          name: 'The Sun',            nameTH: 'พระอาทิตย์' },
+  { file: '20-Judgement',       name: 'Judgement',          nameTH: 'การพิพากษา' },
+  { file: '21-TheWorld',        name: 'The World',          nameTH: 'โลก' },
+];
+
+const NUM_NAMES_EN = ['','Ace','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Page','Knight','Queen','King'];
+const NUM_NAMES_TH = ['','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า','สิบ','เพจ','อัศวิน','ราชินี','ราชา'];
+const SUITS = ['Cups','Swords','Wands','Pentacles'];
+const SUIT_TH = { Cups: 'ถ้วย', Swords: 'ดาบ', Wands: 'ไม้เท้า', Pentacles: 'เหรียญ' };
+
+const MINOR = [];
+for (const suit of SUITS) {
+  for (let n = 1; n <= 14; n++) {
+    const num = String(n).padStart(2, '0');
+    const nameEN = n === 1 ? `Ace of ${suit}` : `${NUM_NAMES_EN[n]} of ${suit}`;
+    const nameTH = n === 1 ? `เอซแห่ง${SUIT_TH[suit]}` : `${NUM_NAMES_TH[n]}แห่ง${SUIT_TH[suit]}`;
+    MINOR.push({ file: `${suit}${num}`, name: nameEN, nameTH });
+  }
+}
+
+const DECK = [...MAJOR, ...MINOR]; // 78 cards
+
+function positionLabel(i) {
+  return String(i + 1);
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+
+let drawnCards = []; // [{card, reversed, revealed}]
+let cardCount = 3;
+
+// card dimensions by count
+const CARD_SIZES = {
+  1: [180, 316], 2: [170, 298], 3: [160, 280],
+  4: [138, 242], 5: [115, 201], 6: [96, 168], 7: [84, 147],
+};
+const SPREAD_GAPS = {
+  1: 28, 2: 28, 3: 28, 4: 22, 5: 18, 6: 14, 7: 12,
+};
+
+// ── Shuffle (Fisher-Yates) ───────────────────────────────────────────────────
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Count picker ──────────────────────────────────────────────────────────────
+
+function setCount(n) {
+  cardCount = n;
+  document.querySelectorAll('.count-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i + 1 === n);
+  });
+  resetDeck();
+}
+
+// ── Deal ─────────────────────────────────────────────────────────────────────
+
+function shuffleDeal() {
+  const shuffled = shuffle(DECK);
+  drawnCards = shuffled.slice(0, cardCount).map(card => ({
+    card,
+    reversed: Math.random() < 0.33, // ~1 in 3 chance reversed
+    revealed: false,
+  }));
+
+  renderSpread();
+  document.getElementById('revealBtn').disabled = false;
+  document.getElementById('revealHint').style.display = 'block';
+  document.getElementById('exportBlock').style.display = 'none';
+}
+
+// ── Render spread ─────────────────────────────────────────────────────────────
+
+function applySizeToSpread(spread, count) {
+  const [w, h] = CARD_SIZES[count] || CARD_SIZES[3];
+  const gap = SPREAD_GAPS[count] || 20;
+  spread.style.setProperty('--card-w', w + 'px');
+  spread.style.setProperty('--card-h', h + 'px');
+  spread.style.gap = gap + 'px';
+}
+
+function renderSpread() {
+  const spread = document.getElementById('spread');
+  spread.innerHTML = '';
+  applySizeToSpread(spread, drawnCards.length);
+
+  drawnCards.forEach((entry, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+
+    // Position label
+    const posLabel = document.createElement('div');
+    posLabel.className = 'position-label';
+    posLabel.textContent = positionLabel(i);
+    slot.appendChild(posLabel);
+
+    // Scene
+    const scene = document.createElement('div');
+    scene.className = 'card-scene' + (entry.revealed ? (entry.reversed ? ' reversed' : ' flipped') : '');
+    scene.title = 'Click to reveal';
+    scene.addEventListener('click', () => flipCard(i));
+
+    const inner = document.createElement('div');
+    inner.className = 'card-inner';
+
+    // Back face
+    const backFace = document.createElement('div');
+    backFace.className = 'card-face card-back-face';
+    const backImg = document.createElement('img');
+    backImg.src = 'Cards-jpg/CardBacks.jpg';
+    backImg.alt = 'Card back';
+    backFace.appendChild(backImg);
+
+    // Front face
+    const frontFace = document.createElement('div');
+    frontFace.className = 'card-face card-front-face';
+    const frontImg = document.createElement('img');
+    frontImg.src = `Cards-jpg/${entry.card.file}.jpg`;
+    frontImg.alt = entry.card.name;
+    frontFace.appendChild(frontImg);
+
+    inner.appendChild(backFace);
+    inner.appendChild(frontFace);
+    scene.appendChild(inner);
+    slot.appendChild(scene);
+
+    // Name label
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'card-name';
+    if (entry.revealed) {
+      nameLabel.textContent = lang === 'th' ? (entry.card.nameTH || entry.card.name) : entry.card.name;
+      if (entry.reversed) {
+        const tag = document.createElement('span');
+        tag.className = 'reversed-tag';
+        tag.textContent = lang === 'th' ? 'กลับหัว' : 'Reversed';
+        nameLabel.appendChild(tag);
+      }
+    }
+    slot.appendChild(nameLabel);
+
+    spread.appendChild(slot);
+  });
+}
+
+function flipCard(i) {
+  if (drawnCards[i].revealed) return;
+  drawnCards[i].revealed = true;
+  renderSpread();
+  checkAllRevealed();
+}
+
+function revealAll() {
+  drawnCards.forEach(e => e.revealed = true);
+  renderSpread();
+  checkAllRevealed();
+}
+
+function checkAllRevealed() {
+  const allDone = drawnCards.every(e => e.revealed);
+  if (allDone) {
+    document.getElementById('revealHint').style.display = 'none';
+    document.getElementById('revealBtn').disabled = true;
+    buildAndShowPrompt();
+  }
+}
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+
+function resetDeck() {
+  drawnCards = [];
+  document.getElementById('revealBtn').disabled = true;
+  document.getElementById('revealHint').style.display = 'none';
+  document.getElementById('exportBlock').style.display = 'none';
+  renderPlaceholders();
+}
+
+// ── Prompt builder ───────────────────────────────────────────────────────────
+
+function buildPrompt() {
+  const question = document.getElementById('question').value.trim();
+  const isTH = lang === 'th';
+  const n = drawnCards.length;
+
+  const cardLines = drawnCards.map((entry, i) => {
+    const cardName = isTH ? (entry.card.nameTH || entry.card.name) : entry.card.name;
+    const rev = entry.reversed ? (isTH ? ' (กลับหัว)' : ' (Reversed)') : '';
+    return `  ${isTH ? 'ไพ่' : 'Card'} ${i + 1}: ${cardName}${rev}`;
+  }).join('\n');
+
+  let systemBlock, prompt;
+
+  if (isTH) {
+    systemBlock = `คุณคือหมอดูไพ่ทาโรต์ผู้เชี่ยวชาญอย่างลึกซึ้ง — ได้รับการศึกษาในประเพณี Rider-Waite คุ้นเคยกับการทำงานเงาแบบยุง สัญลักษณ์เฮอร์เมติก และน้ำหนักที่แท้จริงของประสบการณ์มนุษย์ คุณไม่ให้คำพูดที่คลุมเครือหรือไม่มีความหมาย คุณอ่านสิ่งที่อยู่ตรงหน้าคุณจริงๆ: ไพ่เฉพาะ ตำแหน่ง การกลับหัว และคำถามที่ถาม การอ่านของคุณ:
+
+• แม่นยำ — อิงจากความหมายไพ่คลาสสิกและการปฏิสัมพันธ์ระหว่างกัน
+• ลึกซึ้ง — คุณติดตามด้ายสัญลักษณ์ตลอดทุกใบในฐานะเรื่องราวที่เชื่อมโยงกัน
+• ลึกลับ — คุณตั้งชื่อสิ่งที่ผู้ถามอาจไม่ได้พูดออกมาแต่จะรับรู้ว่าเป็นความจริง; คุณค้นหาการสั่นสะเทือนที่น่าหวาดเสียวระหว่างภาพและสถานการณ์
+• ซื่อสัตย์ — คุณไม่ทำให้ไพ่ที่ยากลำบากดูอ่อนลง; ความตาย หอคอย หรือไพ่กลับหัวถูกอ่านด้วยสายตาที่ชัดเจน
+
+โครงสร้างการอ่านของคุณ:
+1. บทนำสั้นๆ ที่บรรยายบรรยากาศโดยรวมของการวางไพ่
+2. การอ่านอย่างละเอียดของแต่ละใบในตำแหน่งของมัน ตามลำดับ
+3. การสังเคราะห์: ไพ่ทั้งหมดรวมกันสร้างข้อความเดียวหรือความตึงเครียดอย่างไร
+4. การสังเกตปิด — ข้อมูลเชิงลึกที่แม่นยำและไม่คาดคิดหนึ่งข้อที่ตัดถึงใจของคำถาม
+
+อย่าออกจากตัวละคร อย่าเพิ่มข้อแม้เกี่ยวกับการที่ไพ่ทาโรต์เป็น "เพื่อความบันเทิง" พูดในฐานะคนที่นั่งอยู่ตรงข้ามกับผู้คนร้อยคนในช่วงเวลาเปลี่ยนผ่านของชีวิตพวกเขา ตอบเป็นภาษาไทย`;
+
+    prompt = `${systemBlock}\n\n`;
+    if (question) {
+      prompt += `ผู้ถามถามว่า: "${question}"\n\n`;
+    } else {
+      prompt += `ผู้ถามจั่วไพ่โดยไม่ได้ตั้งคำถาม — อ่านสิ่งที่ไพ่เปิดเผยด้วยตัวเอง\n\n`;
+    }
+    prompt += `การวางไพ่ ${n} ใบ:\n${cardLines}\n\nเริ่มการอ่าน`;
+  } else {
+    systemBlock = `You are a tarot reader of rare depth — learned in the Rider-Waite tradition, conversant with Jungian shadow work, Hermetic symbolism, and the lived weight of human experience. You do not give vague platitudes. You read what is actually in front of you: the specific cards, their positions, their reversals, and the question asked. Your readings are:
+
+• Accurate — grounded in classical card meanings and their interaction with one another
+• In-depth — you trace the symbolic thread across all cards as a coherent narrative arc
+• Uncanny — you name things the querent may not have said aloud but will recognize as true; you find the unsettling resonance between image and circumstance
+• Honest — you do not soften difficult cards; Death, The Tower, or reversed cards are read with clear eyes
+
+Structure your reading as:
+1. A brief opening that names the overall atmosphere of the spread
+2. A close reading of each card in its position, in sequence
+3. A synthesis: how all the cards together form a single message or tension
+4. A closing observation — one precise, unexpected insight that cuts to the heart of the question
+
+Do not break character. Do not add caveats about tarot being "for entertainment." Speak as someone who has sat across from a hundred people at a turning point in their lives.`;
+
+    prompt = `${systemBlock}\n\n`;
+    if (question) {
+      prompt += `The querent asks: "${question}"\n\n`;
+    } else {
+      prompt += `The querent has drawn without voicing a question — read what the cards reveal on their own.\n\n`;
+    }
+    prompt += `The ${n}-card spread is:\n${cardLines}\n\nBegin the reading.`;
+  }
+
+  return prompt;
+}
+
+function buildAndShowPrompt() {
+  const prompt = buildPrompt();
+  document.getElementById('promptBox').textContent = prompt;
+  document.getElementById('exportBlock').style.display = 'block';
+  document.getElementById('exportBlock').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPlaceholders() {
+  const spread = document.getElementById('spread');
+  spread.innerHTML = '';
+  applySizeToSpread(spread, cardCount);
+  for (let i = 0; i < cardCount; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.innerHTML = `
+      <div class="position-label">${positionLabel(i)}</div>
+      <div class="card-placeholder"><span>&#9890;</span></div>
+      <div class="card-name"></div>
+    `;
+    spread.appendChild(slot);
+  }
+}
+
+// init
+renderPlaceholders();
+
+async function copyPrompt() {
+  const text = document.getElementById('promptBox').textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  const fb = document.getElementById('copyFeedback');
+  fb.classList.add('show');
+  setTimeout(() => fb.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
